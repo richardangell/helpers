@@ -1,9 +1,44 @@
-summarise_variables <- function(df,
-                                cols = NULL,
-                                observed = NULL,
-                                predictions1 = NULL,
-                                predictions2 = NULL,
-                                weight = NULL) {
+#' Summarise multiple columns of a data.frame
+#'
+#' Take a serveral variables (x) in a data.frame and summarise other variables
+#' of interest by these variables (x). Useful if you want to summarise
+#' predictions and observed values from a model, by certain explanatory
+#' variables.
+#'
+#' @param df \code{data.frame} containing variables of interest.
+#' @param cols \code{character} vector of columns to summarise by.
+#' @param observed \code{character} name of observed column to summarise by col.
+#' @param predictions \code{character} name of predictions column to summarise
+#' by col, can be a vector of multiple columns.
+#' @param weights \code{character} name of weights column to summarise by col.
+#' Default = \code{NULL} uses equal weights.
+#'
+#' @return
+#' named \code{list} containing a \code{tibble} for each column specified in
+#' \code{cols}. Each \code{tibble} contains weights, observed and predictions
+#' (if specified) summarised by that particular column.
+#'
+#' @examples
+#' set.seed(1)
+#' data <- data.frame(a = c(runif(1000), rep(NA, 10)),
+#'                    b = rnorm(1010),
+#'                    c = rpois(1010, 3),
+#'                    d = rnorm(1010),
+#'                    e = runif(1010),
+#'                    f = factor(sample(1010)),
+#'                    g = as.character(sample(5, size = 1010, replace = T)))
+#'
+#' summarise_column(df = data,
+#'                  col = c("a", "c", "f", "g"),
+#'                  observed = "b",
+#'                  predictions = c("e","d"))
+#'
+#' @export
+summarise_columns <- function(df,
+                              cols = NULL,
+                              observed = NULL,
+                              predictions = NULL,
+                              weights = NULL) {
 
   #----------------------------------------------------------------------------#
   # Section 0. Input checking ----
@@ -23,20 +58,11 @@ summarise_variables <- function(df,
 
   }
 
-  if (all(sapply(c(observed,
-                   predictions1,
-                   predictions2,
-                   weight),
-                 is.null))) {
+  summary_variables <- c(observed, predictions, weights)
 
-    stop("no summary variables (observed, predictions1, predictions2, weight) have been specified")
+  if (all(sapply(summary_variables, is.null))) {
 
-  } else {
-
-    summary_variables <- c(observed,
-                           predictions1,
-                           predictions2,
-                           weight)
+    stop("no summary variables (observed, predictions, weights) have been specified")
 
   }
 
@@ -51,38 +77,31 @@ summarise_variables <- function(df,
 
   }
 
-  if (!is.null(predictions1)) {
+  if (!is.null(predictions)) {
 
-    if (!predictions1 %in% colnames(df)) {
+    for (p in predictions) {
 
-      stop(gettextf("predictions1 (%s) is not in df",
-                    sQuote(predictions1)))
+      if (!p %in% colnames(df)) {
 
-    }
+        stop(gettextf("predictions column (%s) is not in df",
+                      sQuote(p)))
 
-  }
-
-  if (!is.null(predictions2)) {
-
-    if (!predictions2 %in% colnames(df)) {
-
-      stop(gettextf("predictions2 (%s) is not in df",
-                    sQuote(predictions2)))
+      }
 
     }
 
   }
 
-  if (!is.null(weight)) {
+  if (!is.null(weights)) {
 
-    if (!weight %in% colnames(df)) {
+    if (!weights %in% colnames(df)) {
 
-      stop(gettextf("weight (%s) is not in df",
-                    sQuote(weight)))
+      stop(gettextf("weights (%s) is not in df",
+                    sQuote(weights)))
 
     }
 
-    if (!any(df[[weight]] > 0)) {
+    if (!any(df[[weights]] > 0)) {
 
       stop("no weights > 0")
 
@@ -90,9 +109,9 @@ summarise_variables <- function(df,
 
   } else {
 
-    df[["weights_column_temp_1234"]] <- rep(1, nrow(df))
+    df[["_weights_temp_"]] <- rep(1, nrow(df))
 
-    weight <- "weights_column_temp_1234"
+    weights <- "_weights_temp_"
 
   }
 
@@ -136,9 +155,8 @@ summarise_variables <- function(df,
       df = df,
       col = col,
       observed = observed,
-      predictions1 = predictions1,
-      predictions2 = predictions2,
-      weights = weight
+      predictions = predictions,
+      weights = weights
     )
 
   }
@@ -147,9 +165,9 @@ summarise_variables <- function(df,
   # is this required?
   # will adding the weights column to the data.frame within the function
   #   create a copy of df? if so this should be avoided
-  if (weight == "weights_column_temp_1234") {
+  if (weights == "_weights_temp_") {
 
-    df$weights_column_temp_1234 <- NULL
+    df[['_weights_temp_']] <- NULL
 
   }
 
