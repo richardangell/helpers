@@ -1,4 +1,57 @@
-
+#' Plot variable summary using plotly
+#'
+#' Plot variable summary; bars of sum of weights (right y axis), lines show
+#' average observed (pink), predictions1 (dark green) and predictions2 (light
+#' green) and are plotted on the left y axis. Plot is generated using plotly so
+#' there are various interactive elements to the graph.
+#'
+#' @param df \code{data.frame} containing summarised points to plot. Typcially
+#' output from the \code{summarise_column} function.
+#' @param col \code{character} name of the summarising column in df, this will
+#' be plotted along the x axis.
+#' @param observed \code{character} name of observed summary column  in df, this
+#' will be plotted on the left y axis in pink.
+#' @param predictions1 \code{character} name of predictions summary column in df
+#' , this will be plotted on the left y axis in dark green.
+#' @param predictions2 \code{character} name of 2nd predictions column summary
+#' in df, this will be plotted on the left y axis in dark green.
+#' @param weights \code{character} name of weights summary column in df, this
+#' will be plotted on the right y axis with bars.
+#' @param rounding_digits \code{numeic} number of digits to round mouse over
+#' text values to. Default = \code{5}.
+#'
+#' @return
+#' \code{plotly}, \code{htmlwidget} for the produced graph.
+#'
+#' @examples
+#' library(plotly)
+#' library(dplyr)
+#' library(rlang)
+#' library(helpers)
+#'
+#' set.seed(1)
+#' data <- data.frame(a = c(runif(1000), rep(NA, 10)),
+#'                    b = rnorm(1010),
+#'                    c = rpois(1010, 3),
+#'                    d = rnorm(1010),
+#'                    e = runif(1010),
+#'                    f = factor(sample(1010)),
+#'                    g = as.character(sample(5, size = 1010, replace = T)))
+#'
+#' summary <- summarise_column(df = data,
+#'                             col = "a",
+#'                            observed = "b",
+#'                             predictions = c("e","d"),
+#'                             weights = "c")
+#'
+#' plot_bar_line_graph(df = summary,
+#'                     col = "a",
+#'                     observed = "b",
+#'                     predictions1 = "e",
+#'                     predictions2 = "d",
+#'                     weights = "c")
+#'
+#' @export
 plot_bar_line_graph <- function(df,
                                 col,
                                 observed = NULL,
