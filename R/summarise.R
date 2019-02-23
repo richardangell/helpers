@@ -2,15 +2,12 @@
 
 
 
-
-
 summarise_column <- function(df,
                              col,
                              observed,
-                             predictions1,
-                             predictions2,
+                             predictions,
                              weights,
-                             ordered_bins = 30,
+                             ordered_bins = 20,
                              ordered_binning = "equal_width") {
 
   col_class <- class(df[[col]])
@@ -21,38 +18,33 @@ summarise_column <- function(df,
 
   if (any(col_class %in% nominal_classes)) {
 
-    col_type <- "nominal"
-
-    summarised_col <- dplyr_summarise(df = df,
-                                      col = col,
-                                      observed = observed,
-                                      predictions1 = predictions1,
-                                      predictions2 = predictions2,
-                                      weights = weights)
+    summarised_col <- summarise_col_dplyr(df = df,
+                                          col = col,
+                                          observed = observed,
+                                          predictions = predictions,
+                                          weights = weights)
 
   } else if (any(col_class %in% ordered_classes)) {
-
-    col_type <- "ordinal"
 
     df[["binned_ordered"]] <- bin_ordered(ordered = df[[col]],
                                           weights = df[[weights]],
                                           bins = ordered_bins,
                                           binning = ordered_binning)
 
-    summarised_col <- dplyr_summarise(df = df,
-                                      col = "binned_ordered",
-                                      observed = observed,
-                                      predictions1 = predictions1,
-                                      predictions2 = predictions2,
-                                      weights = weights)
+    summarised_col <- summarise_col_dplyr(df = df,
+                                          col = "binned_ordered",
+                                          observed = observed,
+                                          predictions = predictions,
+                                          weights = weights)
 
     colnames(summarised_col) <- gsub("binned_ordered",
                                      col,
                                      colnames(summarised_col))
 
-    # remove the bucketed column - don't want to add to the data.frame
-    #   input by the user - but as a future enhancement...
-    # need to store bucket info and have a way to create buckets from this
+    # remove the bucketed column - don't want to add to the data.frame input by
+    # the user
+    # but as a future enhancement... need to store bucket info and have a way to
+    # create buckets from this
     df[["binned_ordered"]] <- NULL
 
   } else {
@@ -63,15 +55,7 @@ summarise_column <- function(df,
 
   }
 
-  column_summary <- list()
-
-  column_summary$col_class <- col_class
-
-  column_summary$col_type <- col_type
-
-  column_summary$summary <- summarised_col
-
-  return(column_summary)
+  return(summarised_col)
 
 }
 
@@ -80,12 +64,11 @@ summarise_column <- function(df,
 
 
 
-dplyr_summarise <- function(df,
-                            col,
-                            observed,
-                            predictions1,
-                            predictions2,
-                            weights) {
+summarise_col_dplyr <- function(df,
+                                col,
+                                observed,
+                                predictions,
+                                weights) {
 
   if (is.null(weights)) {
 
@@ -97,11 +80,7 @@ dplyr_summarise <- function(df,
 
   summary_results <- df %>%
     group_by(!!by_var) %>%
-    summarise_at(c(observed,
-                   predictions1,
-                   predictions2,
-                   weights),
-                 sum)
+    summarise_at(c(observed, predictions, weights), sum)
 
   if (!is.null(observed)) {
 
@@ -110,24 +89,19 @@ dplyr_summarise <- function(df,
 
   }
 
-  if (!is.null(predictions1)) {
+  if (!is.null(predictions)) {
 
-    summary_results[[predictions1]] <- summary_results[[predictions1]] /
-      summary_results[[weights]]
+    for (p in predictions) {
 
-  }
+      summary_results[[p]] <- summary_results[[p]] / summary_results[[weights]]
 
-  if (!is.null(predictions2)) {
-
-    summary_results[[predictions2]] <- summary_results[[predictions2]] /
-      summary_results[[weights]]
+    }
 
   }
 
   return(summary_results)
 
 }
-
 
 
 
