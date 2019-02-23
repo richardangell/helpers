@@ -6,7 +6,7 @@ Author: Richard Angell
 Maintainer: Richard Angell <richardangell37@gmail.com>
 Description: Functions include; discretising ordered variables, summarising 
     variables and plotting summaries.
-License: MIT
+License: MIT License
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.1.1
