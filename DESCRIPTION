@@ -6,6 +6,7 @@ Author: Richard Angell
 Maintainer: Richard Angell <richardangell37@gmail.com>
 Description: Functions include; discretising ordered variables, summarising 
     variables and plotting summaries.
+Depends: dplyr, rlang, plotly
 License: MIT License
 Encoding: UTF-8
 LazyData: true
