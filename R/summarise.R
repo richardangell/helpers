@@ -1,7 +1,6 @@
 
 
 
-
 summarise_column <- function(df,
                              col,
                              observed,
@@ -26,10 +25,10 @@ summarise_column <- function(df,
 
   } else if (any(col_class %in% ordered_classes)) {
 
-    df[["binned_ordered"]] <- bin_ordered(ordered = df[[col]],
-                                          weights = df[[weights]],
-                                          bins = ordered_bins,
-                                          binning = ordered_binning)
+    df[["binned_ordered"]] <- discretise(x = df[[col]],
+                                         w = df[[weights]],
+                                         bins = ordered_bins,
+                                         type = ordered_binning)
 
     summarised_col <- summarise_col_dplyr(df = df,
                                           col = "binned_ordered",
