@@ -1,6 +1,45 @@
-
-
-
+#' Summarise a column of a data.frame
+#'
+#' Take a particular variable (x) in a data.frame and summarise other variables
+#' of interest by this variable (x). Useful if you want to summarise predictions
+#' and observed values from a model, by certain explanatory variables.
+#'
+#' @param df \code{data.frame} containing variables of interest.
+#' @param col \code{character} name of column to summarise by.
+#' @param observed \code{character} name of observed column to summarise by col.
+#' @param predictions \code{character} name of predictions column to summarise
+#' by col, can be a vector of multiple columns.
+#' @param weights \code{character} name of weights column to summarise by col.
+#' @param ordered_bins \code{numeic} number of bins to discretise col into if it
+#' is ordered. Default = \code{20}.
+#' @param ordered_binning \code{character} type of discretisation to use if col
+#' is ordered. Default = \code{"equal_width"}.
+#'
+#' @return
+#' \code{tibble} containing weights, observed and predictions summarised by col.
+#'
+#' @details
+#' For ordered columns (integer and numeric, ordered factors not yet supported)
+#' the variable is discretised then used to summarise the observed, predictions
+#' etc.
+#'
+#' @examples
+#' set.seed(1)
+#' data <- data.frame(a = c(runif(1000), rep(NA, 10)),
+#'                    b = rnorm(1010),
+#'                    c = rpois(1010, 3),
+#'                    d = rnorm(1010),
+#'                    e = runif(1010),
+#'                    f = factor(sample(1010)),
+#'                    g = as.character(sample(5, size = 1010, replace = T)))
+#'
+#' summarise_column(df = data,
+#'                  col = "a",
+#'                  observed = "b",
+#'                  predictions = c("e","d"),
+#'                  weights = "c")
+#'
+#' @export
 summarise_column <- function(df,
                              col,
                              observed,
@@ -62,7 +101,43 @@ summarise_column <- function(df,
 
 
 
-
+#' Summarise a column of a data.frame using dplyr
+#'
+#' Take a particular variable (x) in a data.frame and summarise other variables
+#' of interest by this variable (x). Useful if you want to summarise predictions
+#' and observed values from a model, by certain explanatory variables.
+#'
+#' @param df \code{data.frame} containing variables of interest.
+#' @param col \code{character} name of column to summarise by.
+#' @param observed \code{character} name of observed column to summarise by col.
+#' @param predictions \code{character} name of predictions column to summarise
+#' by col, can be a vector of multiple columns.
+#' @param weights \code{character} name of weights column to summarise by col.
+#' @param ordered_bins \code{numeic} number of bins to discretise col into if it
+#' is ordered. Default = \code{20}.
+#' @param ordered_binning \code{character} type of discretisation to use if col
+#' is ordered. Default = \code{"equal_width"}.
+#'
+#' @return
+#' \code{tibble} containing weights, observed and predictions summarised by col.
+#'
+#' @examples
+#' set.seed(1)
+#' data <- data.frame(a = c(runif(1000), rep(NA, 10)),
+#'                    b = rnorm(1010),
+#'                    c = rpois(1010, 3),
+#'                    d = rnorm(1010),
+#'                    e = runif(1010),
+#'                    f = factor(sample(1010)),
+#'                    g = as.character(sample(5, size = 1010, replace = T)))
+#'
+#' summarise_col_dplyr(df = data,
+#'                    col = "g",
+#'                    observed = "b",
+#'                    predictions = c("e","d"),
+#'                    weights = "c")
+#'
+#' @export
 summarise_col_dplyr <- function(df,
                                 col,
                                 observed,
